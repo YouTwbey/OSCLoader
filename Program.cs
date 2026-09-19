@@ -1,0 +1,1 @@
+﻿OSCLoader.Core.Main.Init();
