@@ -13,10 +13,12 @@ Instead of OSC features being built in, OSCLoader works in a very similar way as
 OSCLoader works completely on Standalone! The only time a PC will or may be required is to install the APK and to add or remove mods.
 ## Data Reading
 OSCLoader gives more data than other OSC apps. It allows you to read data such as avatar data, VRChat settings, Photon Networking data, and more!
-
-# Upcomming
+## Log Viewer
+OSCLoader opens with a console to allow you to view logs coming from any mods loaded or anything VRChat or any worlds log.
+## Discord RPC Support
+OSCLoader overwrites VRChat's default Discord's RPC to allow for a more appealing game status, such as showcasing info about the world you are in or even current in-game events depending on the world.
 ## World Support
-Soon in the future, OSCLoader will have complete world support. This will only work if the world creator willingly adds OSCLoader support to their world itself. However, this will allow you to interact with VRChat in many new ways!
+OSCLoader has an UDON package to allow for World Support. This will only work if the world creator willingly adds OSCLoader support to their world itself. If so, this will allow you to interact with VRChat in many new ways!
 
 # Setup
 ## PC
