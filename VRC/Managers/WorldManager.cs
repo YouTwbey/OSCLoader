@@ -342,7 +342,7 @@ namespace VRC.Managers
             currentInstance = instance;
             Room newRoom = new Room();
             newRoom.Name = newInstanceName;
-            newRoom.IsVisible = newInstanceVisibility == "public";
+            newRoom.IsVisible = newInstanceVisibility.Contains("public");
             newRoom.MaxPlayers = worldInfo.Capacity;
             PhotonNetwork.CurrentRoom = newRoom;
             if (PhotonNetwork.LocalPlayer != null)

@@ -4,6 +4,8 @@ using Photon.Pun;
 using System.Diagnostics;
 using System.Text;
 using VRC.Managers;
+using WaveEngine.Framework.Graphics;
+using static System.Windows.Forms.LinkLabel;
 
 namespace OSCLoader.Core
 {
@@ -27,6 +29,7 @@ namespace OSCLoader.Core
             VRCModsManager.LoadAllMods();
             Logging.Log($"{VRCModsManager.VRChatMods.Count} mods loaded!");
             LaunchVRChat();
+            DiscordRPC.Start();
             HandleUpdate();
         }
 
@@ -125,6 +128,12 @@ namespace OSCLoader.Core
             return path + "/";
         }
 
+        public static string GetEACLogsPath()
+        {
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData).Replace("Local", "Roaming"), "EasyAntiCheat");
+            return path + "/";
+        }
+
         public static string GetSettingsFile()
         {
             string exeDir = AppContext.BaseDirectory;
@@ -147,6 +156,50 @@ namespace OSCLoader.Core
             VRC.Bootstrap.launch.Program.Main(Environment.GetCommandLineArgs());
 
             Task.Run(() => GetLogFile());
+            Task.Run(() => GetEACLogFile());
+        }
+
+        static async Task GetEACLogFile()
+        {
+            string logFolder = GetEACLogsPath();
+            DateTime startSearching = DateTime.Now;
+            string[] files = Directory.GetFiles(logFolder, "anticheatlauncher.log", SearchOption.AllDirectories);
+            bool searching = true;
+            string currentEACLogFile = "";
+
+            while (searching)
+            {
+                await Task.Delay(100);
+
+                foreach (string file in files)
+                {
+                    DateTime modified = File.GetLastWriteTime(file);
+
+                    if (modified > startSearching)
+                    {
+                        currentEACLogFile = file;
+                        searching = false;
+                        break;
+                    }
+                }
+            }
+
+            using var fs = new FileStream(currentEACLogFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using var reader = new StreamReader(fs, Encoding.UTF8);
+            fs.Seek(0, SeekOrigin.End);
+
+            bool bootFinished = false;
+
+            while (!bootFinished)
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(line)) EasyAntiCheat.Debug.Logging.HandleLog(line);
+                    if (line.Contains("Terminating with:")) bootFinished = true;
+                }
+                await Task.Delay(100);
+            }
         }
 
         static async Task GetLogFile()

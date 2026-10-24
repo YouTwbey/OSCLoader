@@ -206,6 +206,8 @@ namespace VRC.Managers
 
         public static void OnPlayerJoinedAll(Player player)
         {
+            if (player.NickName == "null" || player.IsLocal) DiscordRPC.discordStatus.UpdateInstanceActivity();
+
             foreach (VRCMod mod in VRChatMods)
             {
                 try
@@ -332,8 +334,8 @@ namespace VRC.Managers
 
                 switch (name)
                 {
-                    case "StartInteractionConnection":
-                        WorldInteraction.StartConnection(data);
+                    case "StartConnection":
+                        WorldInteraction.StartConnection();
                         break;
                 }
 
@@ -658,6 +660,23 @@ namespace VRC.Managers
                             OnGameDataAll(s.Substring("SendGameData".Length).TrimStart('(', '"').TrimEnd(')', '"'));
                             break;
 
+                        case string s when s.StartsWith("SetDiscordRPC"):
+                            string[] parts1 = s.Substring("SetDiscordRPC".Length).TrimStart('(').TrimEnd(')').Split(", ");
+
+                            List<string> result1 = new List<string>();
+
+                            foreach (string part in parts1)
+                            {
+                                result1.Add(part.TrimStart('"').TrimEnd('"'));
+                            }
+
+                            if (parts1.Length == 2) DiscordRPC.discordStatus.UdonUpdateActivity(result1[0], bool.Parse(result1[1]));
+                            break;
+
+                        case string s when s.StartsWith("SetWindowTitle"):
+                            Core.ChangeWindowTitle(s.Substring("SetWindowTitle".Length).TrimStart('(', '"').TrimEnd(')', '"'));
+                            break;
+
                         default:
                             Logging.Warn($"Unknown OSCLoader function: {function}");
                             break;
@@ -912,6 +931,8 @@ namespace VRC.Managers
                         WorldManager.UpdateCurrentInfoValues("null", "null", "null", "null");
                         OnJoinedInstanceAll("null", "null", "null", "null", "null");
                     }
+
+                    DiscordRPC.discordStatus.UpdateInstanceActivity();
                 }
                 else if (Message.Contains("[Behaviour] OnDisconnected: "))
                 {
